@@ -1,33 +1,35 @@
 import itertools
 
+class Computer:
+    def __init__(self, memory):
+        self.memory = memory
+        self.ip = 0
 
-def add(memory, instruction_pointer):
-    memory[memory[instruction_pointer + 3]] \
-            = memory[memory[instruction_pointer + 1]] + memory[memory[instruction_pointer + 2]]
+    def __add(self):
+        self.memory[self.memory[self.ip + 3]] \
+                = self.memory[self.memory[self.ip + 1]] + self.memory[self.memory[self.ip + 2]]
 
-    return instruction_pointer + 4
+        self.ip = self.ip + 4
 
+    def __multiply(self):
+        self.memory[self.memory[self.ip + 3]] \
+                = self.memory[self.memory[self.ip + 1]] * self.memory[self.memory[self.ip + 2]]
 
-def multiply(memory, instruction_pointer):
-    memory[memory[instruction_pointer + 3]] \
-            = memory[memory[instruction_pointer + 1]] * memory[memory[instruction_pointer + 2]]
+        self.ip = self.ip + 4
 
-    return instruction_pointer + 4
+    def run(self):
+        instruction = self.memory[self.ip]
 
+        if instruction == 1:
+            self.__add()
+        elif instruction == 2:
+            self.__multiply()
+        elif instruction == 99:
+            return
+        else:
+            return
 
-def run_program(memory, instruction_pointer=0):
-    instruction = memory[instruction_pointer]
-
-    if instruction == 1:
-        instruction_pointer = add(memory, instruction_pointer)
-    elif instruction == 2:
-        instruction_pointer = multiply(memory, instruction_pointer)
-    elif instruction == 99:
-        return
-    else:
-        return
-
-    run_program(memory, instruction_pointer)
+        self.run()
 
 
 def test1():
@@ -38,7 +40,8 @@ def test1():
         memory[1] = 12
         memory[2] = 2
 
-        run_program(memory)
+        computer = Computer(memory)
+        computer.run()
         print(memory[0])
 
 
@@ -52,9 +55,10 @@ def test2():
             memory = initial_memory.copy()
             memory[1] = noun
             memory[2] = verb
-            run_program(memory)
+            computer = Computer(memory)
+            computer.run()
 
-            if memory[0] == 19690720:
+            if computer.memory[0] == 19690720:
                 print(100 * noun + verb)
 
 
