@@ -13,6 +13,12 @@ def test1():
 def test2():
     print("Test 2: ")
 
+    with open("inputs/input05.txt", "r") as f:
+        memory = [int(x) for x in f.readline().split(',')]
+        computer = Computer(memory, [5])
+        computer.run()
+        print(computer.get_output())
+
 
 if __name__ == "__main__":
     test1()

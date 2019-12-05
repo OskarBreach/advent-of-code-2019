@@ -36,6 +36,30 @@ class Computer:
 
             self.output.append(a)
             self.ip += 2
+        elif instruction == 5: # jump-if-true
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+
+            self.ip = b if a != 0 else self.ip + 3
+        elif instruction == 6: # jump-if-false
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+
+            self.ip = b if a == 0 else self.ip + 3
+        elif instruction == 7: # less than
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            pos = self.memory[self.ip + 3]
+
+            self.memory[pos] = 1 if a < b else 0
+            self.ip += 4
+        elif instruction == 8: # equals
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            pos = self.memory[self.ip + 3]
+
+            self.memory[pos] = 1 if a == b else 0
+            self.ip += 4
         elif instruction == 99: # halt
             return
         else: # error
