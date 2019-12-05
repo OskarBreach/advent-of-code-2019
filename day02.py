@@ -1,35 +1,50 @@
 import itertools
 
 class Computer:
-    def __init__(self, memory):
+    def __init__(self, memory, inputs = []):
         self.memory = memory
         self.ip = 0
-
-    def __add(self):
-        self.memory[self.memory[self.ip + 3]] \
-                = self.memory[self.memory[self.ip + 1]] + self.memory[self.memory[self.ip + 2]]
-
-        self.ip = self.ip + 4
-
-    def __multiply(self):
-        self.memory[self.memory[self.ip + 3]] \
-                = self.memory[self.memory[self.ip + 1]] * self.memory[self.memory[self.ip + 2]]
-
-        self.ip = self.ip + 4
+        self.output = []
+        self.inputs = inputs
 
     def run(self):
-        instruction = self.memory[self.ip]
+        instruction = self.memory[self.ip] % 100
+        max_params_required = 2
+        parameters = str(self.memory[self.ip] // 100).zfill(max_params_required)[::-1]
 
-        if instruction == 1:
-            self.__add()
-        elif instruction == 2:
-            self.__multiply()
-        elif instruction == 99:
+        if instruction == 1: # add
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            pos = self.memory[self.ip + 3]
+
+            self.memory[pos] = a + b
+            self.ip += 4
+        elif instruction == 2: # multiply
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            pos = self.memory[self.ip + 3]
+
+            self.memory[pos] = a * b
+            self.ip += 4        
+        elif instruction == 3: # input
+            pos = self.memory[self.ip + 1]
+
+            self.memory[pos] = self.inputs.pop(0)
+            self.ip += 2
+        elif instruction == 4: # output
+            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+
+            self.output.append(a)
+            self.ip += 2
+        elif instruction == 99: # halt
             return
-        else:
+        else: # error
             return
 
         self.run()
+
+    def get_output(self):
+        return self.output
 
 
 def test1():
