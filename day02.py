@@ -1,11 +1,12 @@
 import itertools
 
 class Computer:
-    def __init__(self, memory, inputs = []):
+    def __init__(self, memory, input = []):
         self.memory = memory
         self.ip = 0
         self.output = []
-        self.inputs = inputs
+        self.input = input
+        self.halted = False
 
     def run(self):
         instruction = self.memory[self.ip] % 100
@@ -27,10 +28,13 @@ class Computer:
             self.memory[pos] = a * b
             self.ip += 4        
         elif instruction == 3: # input
-            pos = self.memory[self.ip + 1]
+            if len(self.input) > 0:
+                pos = self.memory[self.ip + 1]
 
-            self.memory[pos] = self.inputs.pop(0)
-            self.ip += 2
+                self.memory[pos] = self.input.pop(0)
+                self.ip += 2
+            else:
+                return
         elif instruction == 4: # output
             a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
 
@@ -61,14 +65,20 @@ class Computer:
             self.memory[pos] = 1 if a == b else 0
             self.ip += 4
         elif instruction == 99: # halt
+            self.halted = True
             return
         else: # error
             return
 
         self.run()
 
+    def add_input(self, input):
+        self.input += input
+
     def get_output(self):
-        return self.output
+        ret = self.output
+        self.output = []
+        return ret
 
 
 def test1():
