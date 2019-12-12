@@ -1,69 +1,76 @@
 import itertools
+from collections import defaultdict
 
 class Computer:
     def __init__(self, memory, input = []):
-        self.memory = memory
+        #self.memory = memory
+        self.memory = defaultdict(int)
+        for i in range(0, len(memory)):
+            self.memory[i] = memory[i]
         self.ip = 0
         self.output = []
         self.input = input
         self.halted = False
+        self.relative_base = 0
+
+    def get_arguments(self, num_args, num_writes):
+        parameters = list(str(self.memory[self.ip] // 100).zfill(num_args + num_writes)[::-1])
+
+        for x in range(num_args, num_args + num_writes):
+            if parameters[x] == '0':
+                parameters[x] = '1'
+
+        args = []
+        self.ip += 1
+
+        while len(args) < num_args + num_writes:
+            args.append(self.memory[self.ip] if parameters[len(args)] == '1' else self.memory[self.relative_base + self.memory[self.ip]] if parameters[len(args)] == '2' else self.memory[self.memory[self.ip]])
+            self.ip += 1
+
+        return args
 
     def run(self):
         instruction = self.memory[self.ip] % 100
-        max_params_required = 2
-        parameters = str(self.memory[self.ip] // 100).zfill(max_params_required)[::-1]
 
         if instruction == 1: # add
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
-            pos = self.memory[self.ip + 3]
-
-            self.memory[pos] = a + b
-            self.ip += 4
+            args = self.get_arguments(2, 1)
+            self.memory[args[2]] = args[0] + args[1]
         elif instruction == 2: # multiply
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
-            pos = self.memory[self.ip + 3]
-
-            self.memory[pos] = a * b
-            self.ip += 4        
+            args = self.get_arguments(2, 1)
+            self.memory[args[2]] = args[0] * args[1]     
         elif instruction == 3: # input
             if len(self.input) > 0:
-                pos = self.memory[self.ip + 1]
+                args = self.get_arguments(0, 1)
 
-                self.memory[pos] = self.input.pop(0)
-                self.ip += 2
+                self.memory[args[0]] = self.input.pop(0)
             else:
                 return
         elif instruction == 4: # output
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
+            args = self.get_arguments(1, 0)
 
-            self.output.append(a)
-            self.ip += 2
+            self.output.append(args[0])
         elif instruction == 5: # jump-if-true
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            args = self.get_arguments(2, 0)
 
-            self.ip = b if a != 0 else self.ip + 3
+            if args[0] != 0:
+                self.ip = args[1]
         elif instruction == 6: # jump-if-false
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
+            args = self.get_arguments(2, 0)
 
-            self.ip = b if a == 0 else self.ip + 3
+            if args[0] == 0:
+                self.ip = args[1]
         elif instruction == 7: # less than
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
-            pos = self.memory[self.ip + 3]
+            args = self.get_arguments(2, 1)
 
-            self.memory[pos] = 1 if a < b else 0
-            self.ip += 4
+            self.memory[args[2]] = 1 if args[0] < args[1] else 0
         elif instruction == 8: # equals
-            a = self.memory[self.ip + 1] if parameters[0] == '1' else self.memory[self.memory[self.ip + 1]]
-            b = self.memory[self.ip + 2] if parameters[1] == '1' else self.memory[self.memory[self.ip + 2]]
-            pos = self.memory[self.ip + 3]
+            args = self.get_arguments(2, 1)
 
-            self.memory[pos] = 1 if a == b else 0
-            self.ip += 4
+            self.memory[args[2]] = 1 if args[0] == args[1] else 0
+        elif instruction == 9: # adjust relative base
+            args = self.get_arguments(1, 0)
+
+            self.relative_base += args[0]
         elif instruction == 99: # halt
             self.halted = True
             return
@@ -80,6 +87,8 @@ class Computer:
         self.output = []
         return ret
 
+    def get_memory(self):
+        return [self.memory[k] for k in self.memory]
 
 def test1():
     print("Test 1: ")
@@ -91,7 +100,7 @@ def test1():
 
         computer = Computer(memory)
         computer.run()
-        print(memory[0])
+        print(computer.get_memory()[0])
 
 
 def test2():

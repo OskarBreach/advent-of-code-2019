@@ -8,25 +8,25 @@ class TestImmediateMode(unittest.TestCase):
         computer = Computer([1001, 2, 1, 0, 99])
         computer.run()
 
-        self.assertEqual(computer.memory, [2, 2, 1, 0, 99])
+        self.assertEqual(computer.get_memory(), [2, 2, 1, 0, 99])
 
     def test_other_immediate_add(self):
         computer = Computer([1101, 3, 3, 0, 99])
         computer.run()
 
-        self.assertEqual(computer.memory, [6, 3, 3, 0, 99])
+        self.assertEqual(computer.get_memory(), [6, 3, 3, 0, 99])
 
     def test_immediate_multiply(self):
         computer = Computer([1002, 4, 3, 4, 33])
         computer.run()
 
-        self.assertEqual(computer.memory, [1002, 4, 3, 4, 99])
+        self.assertEqual(computer.get_memory(), [1002, 4, 3, 4, 99])
 
     def test_other_immediate_multiply(self):
         computer = Computer([102, 4, 1, 0, 99])
         computer.run()
 
-        self.assertEqual(computer.memory, [16, 4, 1, 0, 99])
+        self.assertEqual(computer.get_memory(), [16, 4, 1, 0, 99])
 
 class TestInputAndOutput(unittest.TestCase):
 
@@ -52,13 +52,13 @@ class TestInputAndOutput(unittest.TestCase):
         computer = Computer([3, 0, 99], [1])
         computer.run()
 
-        self.assertEqual(computer.memory, [1, 0, 99])
+        self.assertEqual(computer.get_memory(), [1, 0, 99])
 
     def test_double_input(self):
         computer = Computer([3, 1, 3, 3, 99], [2, 4])
         computer.run()
 
-        self.assertEqual(computer.memory, [3, 2, 3, 4, 99])
+        self.assertEqual(computer.get_memory(), [3, 2, 3, 4, 99])
 
 class TestConditionalJumps(unittest.TestCase):
 
