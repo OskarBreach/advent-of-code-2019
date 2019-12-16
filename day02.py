@@ -16,68 +16,68 @@ class Computer:
     def get_arguments(self, num_args, num_writes):
         parameters = list(str(self.memory[self.ip] // 100).zfill(num_args + num_writes)[::-1])
 
-        for x in range(num_args, num_args + num_writes):
-            if parameters[x] == '0':
-                parameters[x] = '1'
-
         args = []
         self.ip += 1
 
-        while len(args) < num_args + num_writes:
+        while len(args) < num_args:
             args.append(self.memory[self.ip] if parameters[len(args)] == '1' else self.memory[self.relative_base + self.memory[self.ip]] if parameters[len(args)] == '2' else self.memory[self.memory[self.ip]])
+            self.ip += 1
+
+        while len(args) < num_args + num_writes:
+            args.append(self.relative_base + self.memory[self.ip] if parameters[len(args)] == '2' else self.memory[self.ip])
             self.ip += 1
 
         return args
 
     def run(self):
-        instruction = self.memory[self.ip] % 100
+        while self.ip < len(self.memory):
+            instruction = self.memory[self.ip] % 100
 
-        if instruction == 1: # add
-            args = self.get_arguments(2, 1)
-            self.memory[args[2]] = args[0] + args[1]
-        elif instruction == 2: # multiply
-            args = self.get_arguments(2, 1)
-            self.memory[args[2]] = args[0] * args[1]     
-        elif instruction == 3: # input
-            if len(self.input) > 0:
-                args = self.get_arguments(0, 1)
+            if instruction == 1: # add
+                args = self.get_arguments(2, 1)
+                self.memory[args[2]] = args[0] + args[1]
+            elif instruction == 2: # multiply
+                args = self.get_arguments(2, 1)
+                self.memory[args[2]] = args[0] * args[1]     
+            elif instruction == 3: # input
+                if len(self.input) > 0:
+                    args = self.get_arguments(0, 1)
 
-                self.memory[args[0]] = self.input.pop(0)
-            else:
+                    self.memory[args[0]] = self.input.pop(0)
+                else:
+                    return
+            elif instruction == 4: # output
+                args = self.get_arguments(1, 0)
+
+                self.output.append(args[0])
+            elif instruction == 5: # jump-if-true
+                args = self.get_arguments(2, 0)
+
+                if args[0] != 0:
+                    self.ip = args[1]
+            elif instruction == 6: # jump-if-false
+                args = self.get_arguments(2, 0)
+
+                if args[0] == 0:
+                    self.ip = args[1]
+            elif instruction == 7: # less than
+                args = self.get_arguments(2, 1)
+
+                self.memory[args[2]] = 1 if args[0] < args[1] else 0
+            elif instruction == 8: # equals
+                args = self.get_arguments(2, 1)
+
+                self.memory[args[2]] = 1 if args[0] == args[1] else 0
+            elif instruction == 9: # adjust relative base
+                args = self.get_arguments(1, 0)
+
+                self.relative_base += args[0]
+            elif instruction == 99: # halt
+                self.halted = True
                 return
-        elif instruction == 4: # output
-            args = self.get_arguments(1, 0)
+            else: # error
+                return
 
-            self.output.append(args[0])
-        elif instruction == 5: # jump-if-true
-            args = self.get_arguments(2, 0)
-
-            if args[0] != 0:
-                self.ip = args[1]
-        elif instruction == 6: # jump-if-false
-            args = self.get_arguments(2, 0)
-
-            if args[0] == 0:
-                self.ip = args[1]
-        elif instruction == 7: # less than
-            args = self.get_arguments(2, 1)
-
-            self.memory[args[2]] = 1 if args[0] < args[1] else 0
-        elif instruction == 8: # equals
-            args = self.get_arguments(2, 1)
-
-            self.memory[args[2]] = 1 if args[0] == args[1] else 0
-        elif instruction == 9: # adjust relative base
-            args = self.get_arguments(1, 0)
-
-            self.relative_base += args[0]
-        elif instruction == 99: # halt
-            self.halted = True
-            return
-        else: # error
-            return
-
-        self.run()
 
     def add_input(self, input):
         self.input += input

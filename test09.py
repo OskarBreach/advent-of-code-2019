@@ -22,6 +22,14 @@ class TestNewFeatures(unittest.TestCase):
 
         self.assertEqual(computer.get_output(), [1125899906842624])
 
+    def test_mode(self):
+        with open("inputs/input09.txt", "r") as f:
+            memory = [int(x) for x in f.readline().split(',')]
+            computer = Computer(memory, [1])
+            computer.run()
+
+            self.assertEqual(computer.get_output(), [2752191671])
+
 
 if __name__ == "__main__":
     unittest.main()
