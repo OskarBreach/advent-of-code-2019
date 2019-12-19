@@ -1,14 +1,6 @@
 import unittest
-from day10 import best_location, get_asteroids, get_visible
+from day10 import best_location, get_asteroids, get_visible, vaporize_order
 
-def vaporize_order(asteroid_map):
-    best_loc = best_location(asteroid_map)
-    station = (best_loc[0], best_loc[1])
-
-    asteroids = get_asteroids(asteroid_map)
-    visible = get_visible(station, asteroids)
-
-    return [(11,12)]
 
 class TestAsteroidDetect(unittest.TestCase):
 
